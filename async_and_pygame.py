@@ -3,12 +3,13 @@
 import os
 import random
 import time
+import sys
 import pygame
 import eventclient_async
 
 # The minimum number of seconds between each time a local object sends an update to the other clients.
 # Play with this value to see the effect of the update rate.
-RATE_LIMIT = 1.0 / 10    #  1.0s / 10 Hz
+RATE_LIMIT = 1.0 / 10    # 1.0s / 10 Hz
 
 SCREEN_X = 640
 SCREEN_Y = 480
@@ -128,7 +129,7 @@ while True:
     events = pygame.event.get()
     for event in events:
         if event.type == pygame.QUIT:
-            exit(0)
+            sys.exit(0)
 
     # Let asyncio deal with internal event processing, and respond to events/messages
     # from the event distribution system.

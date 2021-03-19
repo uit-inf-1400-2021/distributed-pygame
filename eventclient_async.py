@@ -15,15 +15,13 @@ def run_once_event_loop():
     The dummy task doesn't have to do anything, it's just there to let the asyncio
     event loop process for a bit (until it reaches the dummy task).
     """
-    # These two should essentially do the same.
-    if 0:
-        async def dummy():
-            ...
-        loop.run_until_complete(dummy())
-    else:
-        future = loop.create_future()
-        future.set_result(True)
-        loop.run_until_complete(future)
+    async def dummy():
+        ...
+    loop.run_until_complete(dummy())
+    # You can also use this method:
+    #   future = loop.create_future()
+    #   future.set_result(True)
+    #   loop.run_until_complete(future)
 
 
 class ConnHandler:

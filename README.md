@@ -48,6 +48,32 @@ for event in event_dist.get_events():
 
 That should be it. 
 
+
+Running the server on ifilab100
+-------------------
+
+TK has opened up port TCP/UDP 32000-33000 on ifilab100.stud.cs.uit.no.
+
+This computer is restarted around 05:05 every day to clean up after
+people that forgot to remove things.
+
+To run the server, pick a port number that is not used by somebody
+else already. You could use the course Discord to coordinate this.
+
+Note that the computer has a fairly old distribution of Linux, and the
+default Python 3 version is a bit too old. To run the server, you can
+use a newer version of Python from /opt:
+
+``` 
+/opt/python387/bin/python3 eventserver.py
+```
+
+Or, if you want to specify a port number: 
+
+``` 
+/opt/python387/bin/python3 eventserver.py 32105
+```
+
 Some warnings
 -------------
 
