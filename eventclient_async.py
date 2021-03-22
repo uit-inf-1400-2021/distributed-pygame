@@ -5,6 +5,8 @@ import time
 import json
 
 DEBUG = True
+HOST = 'ifilab100.stud.cs.uit.no'
+# HOST = 'localhost'
 PORT = 32100
 
 
@@ -84,7 +86,7 @@ class ConnHandler:
 
 
 def client_test():
-    evconn = ConnHandler('localhost', PORT)
+    evconn = ConnHandler(HOST, PORT)
     for i in range(60):
         time.sleep(0.3)
         for event in evconn.get_events():

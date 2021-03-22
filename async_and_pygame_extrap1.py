@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Simple example of how the event systems of PyGame and the distributed event queue
 can be used.
+This version adds an example of extrapolation to hide some effects of low update frequencies.
 """
 import os
 import random
@@ -114,7 +115,13 @@ class RemoteObj(MovingObject):
 
     def move(self, time_passed):
         # Could also consider extrapolation to predict position of remote
-        pass
+        # First attempt: extrapolation based on time since received.
+        # This version is vulnerable to jitter and lag, but it's a significant improvement to no extrapolation.
+        p0 = self.last_msg['pos'].copy()   # make sure to work on a copy, not the original
+        v = self.last_msg['speed']
+        dt = self.age()
+        for i in range(2):
+            self.pos[i] = p0[i] + v[i] * dt
 
     def draw(self):
         pygame.draw.circle(screen, self.col, round_pos(self.pos), round(self.size / 2))
