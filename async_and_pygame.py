@@ -8,7 +8,7 @@ import time
 import sys
 import pygame
 import eventclient_async
-from eventclient_async import HOST, PORT
+from config import SERVER, PORT
 
 # The minimum number of seconds between each time a local object sends an update to the other clients.
 # Play with this value to see the effect of the update rate.
@@ -133,7 +133,7 @@ def handle_msg(msg):
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_X, SCREEN_Y), 0, 32)
 
-event_dist = eventclient_async.ConnHandler(HOST, PORT)
+event_dist = eventclient_async.ConnHandler(SERVER, PORT)
 
 objects = {}
 for i in range(10):

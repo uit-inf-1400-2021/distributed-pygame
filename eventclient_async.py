@@ -3,11 +3,8 @@
 import asyncio
 import time
 import json
-
-DEBUG = True
-HOST = 'ifilab100.stud.cs.uit.no'
-# HOST = 'localhost'
-PORT = 32100
+import logging
+from config import SERVER, PORT
 
 
 def run_once_event_loop():
@@ -50,7 +47,7 @@ class ConnHandler:
     # Periodic sends will let the receiver run as well. Queueing some async routine in the
     # receiver seems to be enough as well.
     async def _connect(self):
-        self.in_stream, self.out_stream = await asyncio.open_connection(self.host, self.port, loop=loop)
+        self.in_stream, self.out_stream = await asyncio.open_connection(self.host, self.port)
         asyncio.create_task(self._reader())
         asyncio.create_task(self._writer())
 
@@ -58,9 +55,13 @@ class ConnHandler:
         while True:
             msg = await self.in_stream.readline()
             if len(msg) == 0 and self.in_stream.at_eof():
-                print("Closed stream")
+                logging.info("Closed stream")
                 break
-            await self._in_queue.put(json.loads(msg))
+            try:
+                await self._in_queue.put(json.loads(msg))
+            except (json.JSONDecodeError, UnicodeDecodeError) as e:
+                logging.error("json decode failed for %s", msg)
+                logging.error("exception %s", e)
 
     async def _writer(self):
         while True:
@@ -86,7 +87,8 @@ class ConnHandler:
 
 
 def client_test():
-    evconn = ConnHandler(HOST, PORT)
+    evconn = ConnHandler(SERVER, PORT)
+    print("trying to receive a bit before sending messages to the other side")
     for i in range(60):
         time.sleep(0.3)
         for event in evconn.get_events():
@@ -95,6 +97,8 @@ def client_test():
         if i > 30:
             print("sending")
             evconn.send_event({'msg': 'foobar', 'count': i})
+    print("Asyncio will now file some complaints because we don't shut down the readers and writers properly.")
+    # TODO: should probably close the writer's socket using writer.close(). See https://docs.python.org/3/library/asyncio-stream.html
 
 
 loop = asyncio.get_event_loop()

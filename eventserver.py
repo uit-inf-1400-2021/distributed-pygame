@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 TK has opened up port TCP/UDP 32000-33000 on ifilab100.stud.cs.uit.no.
 
@@ -7,15 +6,10 @@ This computer is restarted around 05:05 every day to clean up after people that 
 to remove things.
 
 This is a very simple version of a cetralized event pub/sub system.
-
-
 """
-
-import sys
 import asyncio
-
-DEBUG = False
-PORT = int(sys.argv[1]) if len(sys.argv) >= 2 else 32100
+import logging
+from config import PORT
 
 
 async def send_to_clients(msg, sender):
@@ -30,7 +24,8 @@ class ClientHandler:
     clients = []
 
     def __init__(self, reader, writer):
-        print("new client", reader, writer)
+        # logging.info("new client %s %s", reader, writer)
+        logging.info("new client %s", writer.get_extra_info('socket').getpeername())
         self.in_stream = reader
         self.out_stream = writer
         self._send_queue = asyncio.Queue()
@@ -44,19 +39,18 @@ class ClientHandler:
         "Close connection and remove client from list"
         self.out_stream.close()
         await self.out_stream.wait_closed()
-        print(self.clients)
+        logging.debug(self.clients)
         self.clients.remove(self)
-        print(self.clients)
+        logging.debug(self.clients)
 
     async def _sender(self):
         "Task that waits for queued messages and sends them to the client one by one"
         while True:
             msg = await self._send_queue.get()
             if self.out_stream.is_closing():
-                print("sender:socket closed")
+                logging.info("sender:socket closed")
                 break
-            if DEBUG:
-                print("sender:sending", msg)
+            logging.debug("sender:sending %s", msg)
             self.out_stream.write(msg)
             await self.out_stream.drain()
 
@@ -64,10 +58,9 @@ class ClientHandler:
         "Receives from client and forwards the received message to other clients"
         while True:
             msg = await self.in_stream.readline()
-            if DEBUG:
-                print("_receiver:received", msg)
+            logging.debug("_receiver:received %s", msg)
             if len(msg) == 0 and self.in_stream.at_eof():
-                print("_receiver:Lost client")
+                logging.info("_receiver:Lost client")
                 break
             await send_to_clients(msg, self)
         await self.close()
